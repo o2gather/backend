@@ -1,0 +1,13 @@
+{
+    "cSpell.words": [
+        "actix",
+        "dotenv",
+        "dotenvy",
+        "Insertable",
+        "jsonwebtoken"
+    ],
+    "rust-analyzer.linkedProjects": [
+        "./Cargo.toml"
+    ],
+    "rust-analyzer.showUnlinkedFileNotification": false
+}
