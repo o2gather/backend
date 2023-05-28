@@ -25,10 +25,10 @@ pub async fn get_user(
                     user_id = id;
                 }
                 None => {
-                    return HttpResponse::InternalServerError().json(DefaultError {
-                        message: "Failed to get user_id from session".to_string(),
-                        error_code: "500".to_string(),
-                    })
+                    return HttpResponse::Forbidden().json(DefaultError {
+                        message: "Forbidden".to_string(),
+                        error_code: "403".to_string(),
+                    });
                 }
             }
         }
@@ -71,10 +71,10 @@ pub async fn patch_user(
                     user_id = id;
                 }
                 None => {
-                    return HttpResponse::InternalServerError().json(DefaultError {
-                        message: "Failed to get user_id from session".to_string(),
-                        error_code: "500".to_string(),
-                    })
+                    return HttpResponse::Forbidden().json(DefaultError {
+                        message: "Forbidden".to_string(),
+                        error_code: "403".to_string(),
+                    });
                 }
             }
         }
