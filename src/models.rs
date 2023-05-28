@@ -1,5 +1,5 @@
 use diesel::prelude::*;
-use serde::{Serialize};
+use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 use crate::schema::users;
 
@@ -20,4 +20,13 @@ pub struct NewUser {
     pub name: String,
     pub email: String,
     pub avatar: String,
+}
+
+#[derive(AsChangeset, Queryable, Deserialize)]
+#[diesel(table_name = users)]
+pub struct UpdateUser {
+    pub avatar: Option<String>,
+    pub name: Option<String>,
+    pub email: Option<String>,
+    pub phone: Option<String>,
 }
