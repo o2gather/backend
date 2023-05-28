@@ -1,0 +1,17 @@
+version: "3"
+services:
+  web:
+    image: "backend:latest"
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      # test page, no need when have frontend
+      - ./static:/app/static
+    depends_on:
+      - redis
+  redis:
+    image: "redis:alpine"

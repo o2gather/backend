@@ -27,6 +27,7 @@ async fn main() -> std::io::Result<()> {
     let google_client_id = env::var("GOOGLE_CLIENT_ID").expect("GOOGLE_CLIENT_ID must be set");
     let redis_url = env::var("REDIS_URL").expect("REDIS_URL must be set");
     let secret_key = env::var("SECRET_KEY").expect("SECRET_KEY must be set");
+    let stage = env::var("STAGE").unwrap_or("dev".to_string());
     let secret_key = Key::from(secret_key.as_bytes());
     let pool: PgPool = Pool::builder()
         .build(ConnectionManager::<PgConnection>::new(database_url))
@@ -34,6 +35,7 @@ async fn main() -> std::io::Result<()> {
 
     env_logger::init_from_env(Env::default().default_filter_or("info"));
     let session_store = RedisSessionStore::new(redis_url).await.unwrap();
+    let addr = if stage=="dev" { "127.0.0.1" } else { "0.0.0.0" };
 
     HttpServer::new(move || {
         App::new()
@@ -52,7 +54,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::default())
             .configure(api::init)
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind((addr, 8080))?
     .run()
     .await
 }
