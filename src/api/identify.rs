@@ -103,15 +103,7 @@ pub async fn user_login(
 
 #[post("/logout")]
 pub async fn user_logout(session: Session) -> impl Responder {
-    match session.remove("user_id") {
-        Some(_) => (),
-        None => {
-            return HttpResponse::Unauthorized().json(DefaultError {
-                message: "Not logged in".to_string(),
-                error_code: "401".to_string(),
-            })
-        }
-    }
+    session.purge();
 
     HttpResponse::Ok().json(DefaultMsg {
         message: "Logged out".to_string(),
