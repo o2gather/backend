@@ -9,8 +9,6 @@ use crate::db::{get_user_by_id, update_user};
 use crate::models::User;
 use crate::models::UpdateUser;
 
-
-
 #[get("/users/{user_id}")]
 pub async fn get_user(
     path: web::Path<(Uuid,)>,

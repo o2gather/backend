@@ -1,10 +1,12 @@
 {
     "cSpell.words": [
         "actix",
+        "chrono",
         "dotenv",
         "dotenvy",
         "Insertable",
-        "jsonwebtoken"
+        "jsonwebtoken",
+        "ptass"
     ],
     "rust-analyzer.linkedProjects": [
         "./Cargo.toml"

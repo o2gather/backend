@@ -6,6 +6,7 @@ diesel::table! {
         event_id -> Uuid,
         user_id -> Uuid,
         content -> Text,
+        create_at -> Timestamp,
     }
 }
 
@@ -13,6 +14,7 @@ diesel::table! {
     event_members (event_id, user_id) {
         event_id -> Uuid,
         user_id -> Uuid,
+        amount -> Int8,
     }
 }
 
@@ -26,6 +28,7 @@ diesel::table! {
         end_time -> Timestamp,
         min_amount -> Int8,
         max_amount -> Int8,
+        user_id -> Uuid,
     }
 }
 
@@ -44,6 +47,7 @@ diesel::joinable!(event_comments -> events (event_id));
 diesel::joinable!(event_comments -> users (user_id));
 diesel::joinable!(event_members -> events (event_id));
 diesel::joinable!(event_members -> users (user_id));
+diesel::joinable!(events -> users (user_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     event_comments,
