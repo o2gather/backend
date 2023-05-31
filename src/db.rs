@@ -79,6 +79,8 @@ pub fn create_event(conn: &mut PgConnection, event_data: NewEvent) -> EventWithM
         .load::<EventMember>(conn)
         .expect("Error getting event members");
 
+    let amount: i64 = members.iter().map(|m| m.amount).sum();
+
     EventWithMembers {
         id: event.id,
         user_id: event.user_id,
@@ -89,19 +91,55 @@ pub fn create_event(conn: &mut PgConnection, event_data: NewEvent) -> EventWithM
         end_time: event.end_time,
         min_amount: event.min_amount,
         max_amount: event.max_amount,
+        amount,
         members: Some(members),
     }
 }
 
-pub fn get_events(conn: &mut PgConnection) -> Vec<Event> {
+pub fn get_events(conn: &mut PgConnection) -> Vec<EventWithMembers> {
     use crate::schema::events;
+    use crate::schema::event_members;
+    use crate::schema::users;
 
-    events::table
+    let event = events::table
         .order(events::start_time.asc())
         .then_order_by(events::end_time.asc())
         .select(Event::as_select())
         .load::<Event>(conn)
-        .expect("Error getting events")
+        .expect("Error getting events");
+
+    event
+        .into_iter()
+        .map(|e| {
+            let members = event_members::table
+            .filter(event_members::event_id.eq(e.id))
+            .inner_join(users::table)
+            .select((
+                users::name,
+                users::email,
+                users::phone,
+                event_members::amount,
+            ))
+            .load::<EventMember>(conn)
+            .expect("Error getting event members");
+    
+            let amount: i64 = members.iter().map(|m| m.amount).sum();
+
+            EventWithMembers {
+                id: e.id,
+                user_id: e.user_id,
+                name: e.name,
+                description: e.description,
+                category: e.category,
+                start_time: e.start_time,
+                end_time: e.end_time,
+                min_amount: e.min_amount,
+                max_amount: e.max_amount,
+                amount,
+                members: None,
+            }
+        })
+        .collect()
 }
 
 pub fn get_event_by_id(
@@ -137,11 +175,11 @@ pub fn get_event_by_id(
         end_time: event.end_time,
         min_amount: event.min_amount,
         max_amount: event.max_amount,
+        amount: 0,
         members: None,
     };
 
-    if event.user_id == user_id {
-        let members = event_members::table
+    let members = event_members::table
             .filter(event_members::event_id.eq(event.id))
             .inner_join(users::table)
             .select((
@@ -152,8 +190,13 @@ pub fn get_event_by_id(
             ))
             .load::<EventMember>(conn)
             .expect("Error getting event members");
+    
+    let amount: i64 = members.iter().map(|m| m.amount).sum();
+
+    if event.user_id == user_id {
         data.members = Some(members);
     }
+    data.amount = amount;
 
     Some(data)
 }
@@ -195,6 +238,8 @@ pub fn update_event(
         .load::<EventMember>(conn)
         .expect("Error getting event members");
 
+    let amount: i64 = members.iter().map(|m| m.amount).sum();
+
     EventWithMembers {
         id: event.id,
         user_id: event.user_id,
@@ -205,6 +250,7 @@ pub fn update_event(
         end_time: event.end_time,
         min_amount: event.min_amount,
         max_amount: event.max_amount,
+        amount,
         members: Some(members),
     }
 }
@@ -220,6 +266,7 @@ pub fn delete_event(conn: &mut PgConnection, event_id: Uuid) -> bool {
 pub fn get_events_by_user_id(conn: &mut PgConnection, user_id: Uuid) -> Vec<EventWithMembers> {
     use crate::schema::event_members;
     use crate::schema::events;
+    use crate::schema::users;
 
     let event1: Vec<Event> = events::table
         .filter(events::user_id.eq(user_id))
@@ -236,21 +283,40 @@ pub fn get_events_by_user_id(conn: &mut PgConnection, user_id: Uuid) -> Vec<Even
         .load::<Event>(conn)
         .expect("Error getting events");
 
+    
+
     let mut event: Vec<Event> = event1;
     event.extend(event2);
     event
         .into_iter()
-        .map(|e| EventWithMembers {
-            id: e.id,
-            user_id: e.user_id,
-            name: e.name,
-            description: e.description,
-            category: e.category,
-            start_time: e.start_time,
-            end_time: e.end_time,
-            min_amount: e.min_amount,
-            max_amount: e.max_amount,
-            members: None,
+        .map(|e| {
+            let members = event_members::table
+            .filter(event_members::event_id.eq(e.id))
+            .inner_join(users::table)
+            .select((
+                users::name,
+                users::email,
+                users::phone,
+                event_members::amount,
+            ))
+            .load::<EventMember>(conn)
+            .expect("Error getting event members");
+    
+            let amount: i64 = members.iter().map(|m| m.amount).sum();
+
+            EventWithMembers {
+                id: e.id,
+                user_id: e.user_id,
+                name: e.name,
+                description: e.description,
+                category: e.category,
+                start_time: e.start_time,
+                end_time: e.end_time,
+                min_amount: e.min_amount,
+                max_amount: e.max_amount,
+                amount,
+                members: None,
+            }
         })
         .collect()
 }

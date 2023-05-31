@@ -253,7 +253,6 @@ pub async fn get_user_events(
     session: Session,
 ) -> impl Responder {
     let user_id: Uuid;
-    let null_uuid = Uuid::nil();
 
     match session.get::<Uuid>("user_id") {
         Ok(id) => {
@@ -289,7 +288,7 @@ pub async fn get_user_events(
         });
     }
 
-    let events = db::get_events_by_user_id(&mut conn, null_uuid);
+    let events = db::get_events_by_user_id(&mut conn, user_id);
 
     HttpResponse::Ok().json(events)
 }

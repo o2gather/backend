@@ -104,6 +104,7 @@ pub struct EventWithMembers {
     pub end_time: NaiveDateTime,
     pub min_amount: i64,
     pub max_amount: i64,
+    pub amount: i64,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub members: Option<Vec<EventMember>>,
 }
