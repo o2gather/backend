@@ -29,6 +29,12 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta-init
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-init
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
@@ -36,3 +42,11 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./Dockerfile.init
+          push: true
+          tags: ${{ steps.meta-init.outputs.tags }}
+          labels: ${{ steps.meta-init.outputs.labels }}

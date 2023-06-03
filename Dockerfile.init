@@ -1,0 +1,9 @@
+FROM rust:1-bookworm
+WORKDIR /app
+COPY src ./src
+COPY Cargo.toml .
+COPY diesel.toml .
+COPY migrations ./migrations
+RUN cargo install diesel_cli
+
+CMD [ "diesel", "migration", "run" ]
