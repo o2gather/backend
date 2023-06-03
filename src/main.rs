@@ -45,15 +45,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         let cors: Cors;
         if env::var("CORS").unwrap_or("false".to_string()) == "true" {
-            cors = Cors::default()
-                .send_wildcard()
-                .allowed_methods(vec!["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"])
-                .allowed_headers(vec![
-                    http::header::AUTHORIZATION,
-                    http::header::ACCEPT,
-                    http::header::CONTENT_TYPE,
-                    http::header::COOKIE,
-                ])
+            cors = Cors::permissive()
                 .max_age(3600);
         } else {
             cors = Cors::default();
