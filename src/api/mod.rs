@@ -11,13 +11,14 @@ mod event_related;
 
 mod identify_test;
 
-use crate::api::index::demo;
+use crate::api::index::{demo, ping};
 use crate::api::types::DefaultError;
 use crate::api::identify::{user_login, user_logout};
 use crate::api::user_info::{get_user, patch_user};
 
 pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(demo);
+    cfg.service(ping);
     cfg.service(login_mock);
     cfg.service(web::scope("/api/v1")
         .service(user_login)

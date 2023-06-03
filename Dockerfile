@@ -12,5 +12,6 @@ RUN adduser --disabled-password user && apt update && \
     rm -rf /var/lib/apt/lists/*
 COPY --from=builder --chown=user:user /app/target/release/backend .
 ENV STAGE=production
+EXPOSE 8080
 USER user
 CMD [ "/app/backend" ]
