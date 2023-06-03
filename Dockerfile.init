@@ -4,6 +4,7 @@ COPY src ./src
 COPY Cargo.toml .
 COPY diesel.toml .
 COPY migrations ./migrations
+RUN apt update && apt install -y libpq-dev
 RUN cargo install diesel_cli
 
 CMD [ "diesel", "migration", "run" ]
