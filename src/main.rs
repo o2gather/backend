@@ -58,6 +58,8 @@ async fn main() -> std::io::Result<()> {
         } else {
             cors = Cors::default();
         }
+        let logger =
+            Logger::new("%{r}a \"%r\" %s %b \"%{Referer}i\" \"%{User-Agent}i\" %T").exclude("/ping");
 
         App::new()
             .app_data(web::Data::new(MyData {
@@ -69,7 +71,7 @@ async fn main() -> std::io::Result<()> {
                     .cookie_name("session".to_string())
                     .build(),
             )
-            .wrap(Logger::default())
+            .wrap(logger)
             .wrap(cors)
             .configure(api::init)
     })
