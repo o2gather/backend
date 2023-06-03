@@ -3,9 +3,10 @@ mod db;
 mod models;
 mod schema;
 
-use actix_web::{middleware::Logger, web, App, HttpServer};
-use actix_session::{SessionMiddleware, storage::RedisSessionStore};
+use actix_cors::Cors;
+use actix_session::{storage::RedisSessionStore, SessionMiddleware};
 use actix_web::cookie::Key;
+use actix_web::{http, middleware::Logger, web, App, HttpServer};
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
 use dotenvy::dotenv;
@@ -35,23 +36,41 @@ async fn main() -> std::io::Result<()> {
 
     env_logger::init_from_env(Env::default().default_filter_or("info"));
     let session_store = RedisSessionStore::new(redis_url).await.unwrap();
-    let addr = if stage=="dev" { "127.0.0.1" } else { "0.0.0.0" };
+    let addr = if stage == "dev" {
+        "127.0.0.1"
+    } else {
+        "0.0.0.0"
+    };
 
     HttpServer::new(move || {
+        let cors: Cors;
+        if env::var("CORS").unwrap_or("false".to_string()) == "true" {
+            cors = Cors::default()
+                .allowed_origin("*")
+                .allowed_methods(vec!["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"])
+                .allowed_headers(vec![
+                    http::header::AUTHORIZATION,
+                    http::header::ACCEPT,
+                    http::header::CONTENT_TYPE,
+                    http::header::COOKIE,
+                ])
+                .max_age(3600);
+        } else {
+            cors = Cors::default();
+        }
+
         App::new()
             .app_data(web::Data::new(MyData {
                 pool: pool.clone(),
                 google_client_id: google_client_id.clone(),
             }))
             .wrap(
-                SessionMiddleware::builder(
-                    session_store.clone(),
-                    secret_key.clone()
-                )
-                .cookie_name("session".to_string())
-                .build()
+                SessionMiddleware::builder(session_store.clone(), secret_key.clone())
+                    .cookie_name("session".to_string())
+                    .build(),
             )
             .wrap(Logger::default())
+            .wrap(cors)
             .configure(api::init)
     })
     .bind((addr, 8080))?
