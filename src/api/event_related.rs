@@ -233,15 +233,12 @@ pub async fn get_event_msgs(
     data: web::Data<MyData>,
     session: Session,
 ) -> impl Responder {
-    let user_id: Uuid;
     let event_id = path.0;
 
     match session.get::<Uuid>("user_id") {
         Ok(id) => {
             match id {
-                Some(id) => {
-                    user_id = id;
-                }
+                Some(_) => (),
                 None => {
                     return HttpResponse::Forbidden().json(DefaultError {
                         message: "Forbidden".to_string(),
