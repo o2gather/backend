@@ -141,5 +141,5 @@ pub struct EventMsg {
     pub user: EventMsgUser,
     pub content: String,
     #[serde(with = "ts_seconds")]
-    pub create_at: NaiveDateTime,
+    pub created_at: NaiveDateTime,
 }

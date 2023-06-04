@@ -270,16 +270,6 @@ pub async fn get_event_msgs(
             error_code: "404".to_string(),
         });
     }
-    let event = event.unwrap();
-    if event.user_id != user_id {
-        let event_member = db::get_event_members(&mut conn, event_id);
-        if event_member.iter().any(|x| *x == user_id) == false {
-            return HttpResponse::Forbidden().json(DefaultError {
-                message: "You are not in this event".to_string(),
-                error_code: "403".to_string(),
-            });
-        }
-    }
 
     let result = db::get_event_msg_by_event_id(&mut conn, event_id);
     match result {

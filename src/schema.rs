@@ -6,7 +6,7 @@ diesel::table! {
         event_id -> Uuid,
         user_id -> Uuid,
         content -> Text,
-        create_at -> Timestamp,
+        created_at -> Timestamp,
     }
 }
 

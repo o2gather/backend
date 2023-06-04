@@ -381,8 +381,8 @@ pub fn create_event_msg(
     event_comments::table
         .filter(event_comments::event_id.eq(event_msg_data.event_id))
         .inner_join(users::table)
-        .select(((users::name, users::avatar), event_comments::content, event_comments::create_at))
-        .order(event_comments::create_at.asc())
+        .select(((users::name, users::avatar), event_comments::content, event_comments::created_at))
+        .order(event_comments::created_at.asc())
         .load::<EventMsg>(conn)
 }
 
@@ -396,8 +396,8 @@ pub fn get_event_msg_by_event_id(
     event_comments::table
         .filter(event_comments::event_id.eq(event_id))
         .inner_join(users::table)
-        .select(((users::name, users::avatar), event_comments::content, event_comments::create_at))
-        .order(event_comments::create_at.asc())
+        .select(((users::name, users::avatar), event_comments::content, event_comments::created_at))
+        .order(event_comments::created_at.asc())
         .load::<EventMsg>(conn)
 }
 
