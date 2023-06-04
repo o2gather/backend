@@ -91,10 +91,21 @@ pub struct EventMember {
     pub amount: i64,
 }
 
+#[derive(Queryable, Serialize, Selectable)]
+#[diesel(table_name = users)]
+pub struct EventOwner {
+    pub id: Uuid,
+    pub name: String,
+    pub avatar: String,
+    pub email: String,
+}
+
 #[derive(Serialize)]
 pub struct EventWithMembers {
     pub id: Uuid,
+    #[serde(skip_serializing)]
     pub user_id: Uuid,
+    pub owner: EventOwner,
     pub name: String,
     pub description: String,
     pub category: String,
@@ -107,6 +118,7 @@ pub struct EventWithMembers {
     pub amount: i64,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub members: Option<Vec<EventMember>>,
+    pub members_count: i64,
 }
 
 #[derive(Deserialize, Insertable)]

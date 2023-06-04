@@ -52,13 +52,6 @@ pub async fn join_event(
             error_code: "404".to_string(),
         });
     }
-    let event = event.unwrap();
-    if event.user_id == user_id {
-        return HttpResponse::BadRequest().json(DefaultError {
-            message: "You are the owner of this event".to_string(),
-            error_code: "400".to_string(),
-        });
-    }
 
     form.event_id = event_id;
     form.user_id = user_id;

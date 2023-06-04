@@ -1,6 +1,6 @@
 use crate::models::{
     Event, EventMember, EventMsg, EventWithMembers, NewEvent, NewEventMember, NewEventMsg, NewUser,
-    UpdateEvent, UpdateUser, User,
+    UpdateEvent, UpdateUser, User, EventOwner
 };
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
@@ -78,12 +78,20 @@ pub fn create_event(conn: &mut PgConnection, event_data: NewEvent) -> EventWithM
         ))
         .load::<EventMember>(conn)
         .expect("Error getting event members");
+    
+    let owner = users::table
+        .filter(users::id.eq(event.user_id))
+        .select(EventOwner::as_select())
+        .first::<EventOwner>(conn)
+        .expect("Error getting event owner");
 
     let amount: i64 = members.iter().map(|m| m.amount).sum();
+    let members_count = members.len() as i64;
 
     EventWithMembers {
         id: event.id,
         user_id: event.user_id,
+        owner: owner,
         name: event.name,
         description: event.description,
         category: event.category,
@@ -93,6 +101,7 @@ pub fn create_event(conn: &mut PgConnection, event_data: NewEvent) -> EventWithM
         max_amount: event.max_amount,
         amount,
         members: Some(members),
+        members_count: members_count,
     }
 }
 
@@ -122,12 +131,19 @@ pub fn get_events(conn: &mut PgConnection) -> Vec<EventWithMembers> {
             ))
             .load::<EventMember>(conn)
             .expect("Error getting event members");
+
+            let owner = users::table
+            .filter(users::id.eq(e.user_id))
+            .select(EventOwner::as_select())
+            .first::<EventOwner>(conn)
+            .expect("Error getting event owner");
     
             let amount: i64 = members.iter().map(|m| m.amount).sum();
 
             EventWithMembers {
                 id: e.id,
                 user_id: e.user_id,
+                owner: owner,
                 name: e.name,
                 description: e.description,
                 category: e.category,
@@ -137,6 +153,7 @@ pub fn get_events(conn: &mut PgConnection) -> Vec<EventWithMembers> {
                 max_amount: e.max_amount,
                 amount,
                 members: None,
+                members_count: members.len() as i64,
             }
         })
         .collect()
@@ -164,10 +181,16 @@ pub fn get_event_by_id(
             return None;
         }
     }
+    let owner = users::table
+        .filter(users::id.eq(event.user_id))
+        .select(EventOwner::as_select())
+        .first::<EventOwner>(conn)
+        .expect("Error getting event owner");
 
     let mut data = EventWithMembers {
         id: event.id,
         user_id: event.user_id,
+        owner: owner,
         name: event.name,
         description: event.description,
         category: event.category,
@@ -177,6 +200,7 @@ pub fn get_event_by_id(
         max_amount: event.max_amount,
         amount: 0,
         members: None,
+        members_count: 0,
     };
 
     let members = event_members::table
@@ -193,6 +217,7 @@ pub fn get_event_by_id(
     
     let amount: i64 = members.iter().map(|m| m.amount).sum();
 
+    data.members_count = members.len() as i64;
     if event.user_id == user_id {
         data.members = Some(members);
     }
@@ -239,10 +264,17 @@ pub fn update_event(
         .expect("Error getting event members");
 
     let amount: i64 = members.iter().map(|m| m.amount).sum();
+    let members_count = members.len() as i64;
+    let owner = users::table
+        .filter(users::id.eq(event.user_id))
+        .select(EventOwner::as_select())
+        .first::<EventOwner>(conn)
+        .expect("Error getting event owner");
 
     EventWithMembers {
         id: event.id,
         user_id: event.user_id,
+        owner: owner,
         name: event.name,
         description: event.description,
         category: event.category,
@@ -252,6 +284,7 @@ pub fn update_event(
         max_amount: event.max_amount,
         amount,
         members: Some(members),
+        members_count: members_count,
     }
 }
 
@@ -301,12 +334,17 @@ pub fn get_events_by_user_id(conn: &mut PgConnection, user_id: Uuid) -> Vec<Even
             ))
             .load::<EventMember>(conn)
             .expect("Error getting event members");
+            let owner = users::table
+            .filter(users::id.eq(e.user_id))
+            .select(EventOwner::as_select())
+            .first::<EventOwner>(conn)
+            .expect("Error getting event owner");
     
             let amount: i64 = members.iter().map(|m| m.amount).sum();
-
-            EventWithMembers {
+            let mut data = EventWithMembers {
                 id: e.id,
                 user_id: e.user_id,
+                owner: owner,
                 name: e.name,
                 description: e.description,
                 category: e.category,
@@ -316,7 +354,13 @@ pub fn get_events_by_user_id(conn: &mut PgConnection, user_id: Uuid) -> Vec<Even
                 max_amount: e.max_amount,
                 amount,
                 members: None,
+                members_count: members.len() as i64,
+            };
+            if e.user_id == user_id {
+                data.members = Some(members);
             }
+
+            data
         })
         .collect()
 }
