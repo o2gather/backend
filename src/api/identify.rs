@@ -1,8 +1,8 @@
 use actix_session::Session;
+use actix_web::cookie::Cookie;
 use actix_web::{post, web, HttpRequest, HttpResponse, Responder};
 use jsonwebtoken_google::Parser;
 use serde::{Deserialize, Serialize};
-use actix_web::cookie::Cookie;
 
 use crate::api::types::{DefaultError, DefaultMsg};
 use crate::db::get_or_create_user;
@@ -58,7 +58,7 @@ pub async fn user_login(
         }
     }
 
-    if g_csrf_token != form.g_csrf_token {
+    if data.cors_enabled == false && g_csrf_token != form.g_csrf_token {
         return HttpResponse::Unauthorized().json(DefaultError {
             message: "Invalid CSRF token".to_string(),
             error_code: "401".to_string(),

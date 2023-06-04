@@ -6,7 +6,7 @@ mod schema;
 use actix_cors::Cors;
 use actix_session::{storage::RedisSessionStore, SessionMiddleware};
 use actix_web::cookie::Key;
-use actix_web::{http, middleware::Logger, web, App, HttpServer};
+use actix_web::{middleware::Logger, web, App, HttpServer};
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
 use dotenvy::dotenv;
@@ -20,6 +20,7 @@ pub struct MyData {
     pool: PgPool,
     google_client_id: String,
     redirect_url: String,
+    cors_enabled: bool,
 }
 
 #[actix_web::main]
@@ -32,6 +33,7 @@ async fn main() -> std::io::Result<()> {
     let stage = env::var("STAGE").unwrap_or("dev".to_string());
     let secret_key = Key::from(secret_key.as_bytes());
     let redirect_url = env::var("REDIRECT_URL").expect("REDIRECT_URL must be set");
+    let cors_enabled = env::var("CORS").unwrap_or("false".to_string()) == "true";
     let pool: PgPool = Pool::builder()
         .build(ConnectionManager::<PgConnection>::new(database_url))
         .expect("Failed to create pool.");
@@ -46,7 +48,7 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         let cors: Cors;
-        if env::var("CORS").unwrap_or("false".to_string()) == "true" {
+        if cors_enabled {
             cors = Cors::permissive()
                 .max_age(3600);
         } else {
@@ -60,6 +62,7 @@ async fn main() -> std::io::Result<()> {
                 pool: pool.clone(),
                 google_client_id: google_client_id.clone(),
                 redirect_url: redirect_url.clone(),
+                cors_enabled: cors_enabled,
             }))
             .wrap(
                 SessionMiddleware::builder(session_store.clone(), secret_key.clone())
