@@ -96,7 +96,7 @@ pub async fn user_login(
         .finish();
 
     HttpResponse::SeeOther()
-        .append_header(("Location", "/"))
+        .append_header(("Location", data.redirect_url.clone()))
         .cookie(cookie)
         .finish()
 }

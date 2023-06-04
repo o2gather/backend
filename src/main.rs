@@ -19,6 +19,7 @@ pub type PgPooledConnection = PooledConnection<ConnectionManager<PgConnection>>;
 pub struct MyData {
     pool: PgPool,
     google_client_id: String,
+    redirect_url: String,
 }
 
 #[actix_web::main]
@@ -30,6 +31,7 @@ async fn main() -> std::io::Result<()> {
     let secret_key = env::var("SECRET_KEY").expect("SECRET_KEY must be set");
     let stage = env::var("STAGE").unwrap_or("dev".to_string());
     let secret_key = Key::from(secret_key.as_bytes());
+    let redirect_url = env::var("REDIRECT_URL").expect("REDIRECT_URL must be set");
     let pool: PgPool = Pool::builder()
         .build(ConnectionManager::<PgConnection>::new(database_url))
         .expect("Failed to create pool.");
@@ -57,6 +59,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(MyData {
                 pool: pool.clone(),
                 google_client_id: google_client_id.clone(),
+                redirect_url: redirect_url.clone(),
             }))
             .wrap(
                 SessionMiddleware::builder(session_store.clone(), secret_key.clone())
