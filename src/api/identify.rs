@@ -1,5 +1,4 @@
 use actix_session::Session;
-use actix_web::cookie::Cookie;
 use actix_web::{post, web, HttpRequest, HttpResponse, Responder};
 use jsonwebtoken_google::Parser;
 use serde::{Deserialize, Serialize};
