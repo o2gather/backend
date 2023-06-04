@@ -49,7 +49,13 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         let cors: Cors;
         if cors_enabled {
-            cors = Cors::permissive()
+            cors = Cors::default()
+                .allow_any_header()
+                .allow_any_method()
+                .allowed_origin_fn(
+                    |_origin, _req_head| true,
+                )
+                .allowed_methods(vec!["GET", "POST", "PUT", "DELETE", "OPTIONS"])
                 .max_age(3600);
         } else {
             cors = Cors::default();
