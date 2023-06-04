@@ -29,6 +29,7 @@ diesel::table! {
         min_amount -> Int8,
         max_amount -> Int8,
         user_id -> Uuid,
+        established -> Bool,
     }
 }
 

@@ -165,6 +165,17 @@ pub async fn patch_event(
             error_code: "403".to_string(),
         });
     }
+    match form.established {
+        Some(established) => {
+            if established == false {
+                return HttpResponse::BadRequest().json(DefaultError {
+                    message: "established can only be set to true".to_string(),
+                    error_code: "400".to_string(),
+                });
+            }
+        }
+        None => {}
+    }
 
     let event = db::update_event(&mut conn, path.0, form.into_inner());
 

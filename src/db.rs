@@ -100,6 +100,7 @@ pub fn create_event(conn: &mut PgConnection, event_data: NewEvent) -> EventWithM
         min_amount: event.min_amount,
         max_amount: event.max_amount,
         amount,
+        established: event.established,
         members: Some(members),
         members_count: members_count,
     }
@@ -152,6 +153,7 @@ pub fn get_events(conn: &mut PgConnection) -> Vec<EventWithMembers> {
                 min_amount: e.min_amount,
                 max_amount: e.max_amount,
                 amount,
+                established: e.established,
                 members: None,
                 members_count: members.len() as i64,
             }
@@ -199,6 +201,7 @@ pub fn get_event_by_id(
         min_amount: event.min_amount,
         max_amount: event.max_amount,
         amount: 0,
+        established: event.established,
         members: None,
         members_count: 0,
     };
@@ -283,6 +286,7 @@ pub fn update_event(
         min_amount: event.min_amount,
         max_amount: event.max_amount,
         amount,
+        established: event.established,
         members: Some(members),
         members_count: members_count,
     }
@@ -353,6 +357,7 @@ pub fn get_events_by_user_id(conn: &mut PgConnection, user_id: Uuid) -> Vec<Even
                 min_amount: e.min_amount,
                 max_amount: e.max_amount,
                 amount,
+                established: e.established,
                 members: None,
                 members_count: members.len() as i64,
             };

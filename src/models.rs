@@ -64,6 +64,7 @@ pub struct UpdateEvent {
     pub end_time: Option<NaiveDateTime>,
     pub min_amount: Option<i64>,
     pub max_amount: Option<i64>,
+    pub established: Option<bool>,
 }
 
 #[derive(Queryable, Selectable, Serialize)]
@@ -81,6 +82,7 @@ pub struct Event {
     pub end_time: NaiveDateTime,
     pub min_amount: i64,
     pub max_amount: i64,
+    pub established: bool,
 }
 
 #[derive(Queryable, Serialize)]
@@ -116,6 +118,7 @@ pub struct EventWithMembers {
     pub min_amount: i64,
     pub max_amount: i64,
     pub amount: i64,
+    pub established: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub members: Option<Vec<EventMember>>,
     pub members_count: i64,
