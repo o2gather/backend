@@ -76,10 +76,7 @@ pub async fn get_event(
                     user_id = id;
                 }
                 None => {
-                    return HttpResponse::Forbidden().json(DefaultError {
-                        message: "Forbidden".to_string(),
-                        error_code: "403".to_string(),
-                    });
+                    user_id = Uuid::nil();
                 }
             }
         }
