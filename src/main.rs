@@ -50,6 +50,7 @@ async fn main() -> std::io::Result<()> {
         let cors: Cors;
         if cors_enabled {
             cors = Cors::default()
+                .supports_credentials()
                 .allow_any_header()
                 .allow_any_method()
                 .allowed_origin_fn(
