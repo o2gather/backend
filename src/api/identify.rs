@@ -89,15 +89,10 @@ pub async fn user_login(
             })
         }
     }
-    let cookie = Cookie::build("user_id", user.id.to_string())
-        .path("/")
-        .secure(false)
-        .http_only(false)
-        .finish();
+    let location = data.redirect_url.clone() + "?user_id=" + &user.id.to_string();
 
     HttpResponse::SeeOther()
-        .append_header(("Location", data.redirect_url.clone()))
-        .cookie(cookie)
+        .append_header(("Location", location))
         .finish()
 }
 
