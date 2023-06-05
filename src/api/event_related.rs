@@ -237,29 +237,8 @@ pub async fn add_event_msg(
 pub async fn get_event_msgs(
     path: web::Path<(Uuid,)>,
     data: web::Data<MyData>,
-    session: Session,
 ) -> impl Responder {
     let event_id = path.0;
-
-    match session.get::<Uuid>("user_id") {
-        Ok(id) => {
-            match id {
-                Some(_) => (),
-                None => {
-                    return HttpResponse::Forbidden().json(DefaultError {
-                        message: "Forbidden".to_string(),
-                        error_code: "403".to_string(),
-                    });
-                }
-            }
-        }
-        Err(_) => {
-            return HttpResponse::InternalServerError().json(DefaultError {
-                message: "Failed to get session".to_string(),
-                error_code: "500".to_string(),
-            })
-        }
-    }
 
     let mut conn = data
         .pool
