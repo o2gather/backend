@@ -16,6 +16,13 @@ fn time_check(start_time: NaiveDateTime, end_time: NaiveDateTime) -> bool {
     return true;
 }
 
+fn amount_check(min_amount: i64, max_amount: i64) -> bool {
+    if min_amount > max_amount {
+        return false;
+    }
+    return true;
+}
+
 #[post("/events")]
 pub async fn create_event(
     mut form: web::Json<NewEvent>,
@@ -49,6 +56,12 @@ pub async fn create_event(
     if time_check(form.start_time, form.end_time) == false {
         return HttpResponse::BadRequest().json(DefaultError {
             message: "Start time should be earlier than end time".to_string(),
+            error_code: "400".to_string(),
+        });
+    }
+    if amount_check(form.min_amount, form.max_amount) == false {
+        return HttpResponse::BadRequest().json(DefaultError {
+            message: "Min amount should be smaller than max amount".to_string(),
             error_code: "400".to_string(),
         });
     }
@@ -160,7 +173,7 @@ pub async fn patch_event(
         .expect("couldn't get db connection from pool");
 
     let data = db::get_event_by_id(&mut conn, path.0, null_uuid);
-    let event: EventWithMembers;
+    let mut event: EventWithMembers;
     match data{
         Some(e) => {
             event = e;
@@ -190,16 +203,30 @@ pub async fn patch_event(
         }
         None => {}
     }
+    if form.start_time.is_some() {
+        event.start_time = form.start_time.unwrap();
+    }
+    if form.end_time.is_some() {
+        event.end_time = form.end_time.unwrap();
+    }
+    if form.max_amount.is_some() {
+        event.max_amount = form.max_amount.unwrap();
+    }
+    if form.min_amount.is_some() {
+        event.min_amount = form.min_amount.unwrap();
+    }
 
-    if form.start_time.is_some() && form.end_time.is_some() {
-        let start_time = form.start_time.unwrap();
-        let end_time = form.end_time.unwrap();
-        if time_check(start_time, end_time) == false {
-            return HttpResponse::BadRequest().json(DefaultError {
-                message: "Start time should be earlier than end time".to_string(),
-                error_code: "400".to_string(),
-            });
-        }
+    if time_check(event.start_time, event.end_time) == false {
+        return HttpResponse::BadRequest().json(DefaultError {
+            message: "Start time should be earlier than end time".to_string(),
+            error_code: "400".to_string(),
+        });
+    }
+    if amount_check(event.min_amount, event.max_amount) == false {
+        return HttpResponse::BadRequest().json(DefaultError {
+            message: "Min amount should be smaller than max amount".to_string(),
+            error_code: "400".to_string(),
+        });
     }
 
     let event = db::update_event(&mut conn, path.0, form.into_inner());
