@@ -23,6 +23,14 @@ jobs:
           DATABASE_NAME: test
         ports:
           - 26257:26257
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
 
     steps:
       - name: Checkout repo.
@@ -30,7 +38,7 @@ jobs:
       - name: Install Rust toolchain.
         uses: dtolnay/rust-toolchain@stable
       - name: set environment variables
-        run: echo "DATABASE_URL=postgres://root@localhost:26257/test" > .env.test
+        run: echo "DATABASE_URL=postgres://root:root@localhost:5432/test" > .env.test
       - name: Install diesel_cli.
         run: cargo install diesel_cli --no-default-features --features postgres
       - name: Run build
