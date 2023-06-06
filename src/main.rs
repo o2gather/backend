@@ -3,6 +3,8 @@ mod db;
 mod models;
 mod schema;
 
+mod db_test;
+
 use actix_cors::Cors;
 use actix_session::{storage::RedisSessionStore, SessionMiddleware};
 use actix_web::cookie::Key;

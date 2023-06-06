@@ -10,6 +10,7 @@ mod events;
 mod event_related;
 
 mod identify_test;
+mod index_test;
 
 use crate::api::index::{demo, ping};
 use crate::api::types::DefaultError;

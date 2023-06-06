@@ -36,8 +36,11 @@ diesel::table! {
 diesel::table! {
     users (id) {
         id -> Uuid,
+        #[max_length = 0]
         name -> Varchar,
+        #[max_length = 0]
         email -> Varchar,
+        #[max_length = 0]
         phone -> Varchar,
         avatar -> Text,
         guid -> Text,

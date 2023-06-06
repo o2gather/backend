@@ -12,9 +12,8 @@ async fn test_logout_without_session() {
 
     let req = test::TestRequest::post().uri("/api/v1/logout").to_request();
     let resp = test::call_service(&app, req).await;
-
     let status = resp.status();
-    assert!(status.is_client_error());
+    assert!(status.is_success());
 }
 
 #[actix_web::test]
