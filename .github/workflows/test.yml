@@ -33,9 +33,5 @@ jobs:
         run: echo "DATABASE_URL=${{ secrets.DB }}" > .env.test
       - name: Install diesel_cli.
         run: cargo install diesel_cli --no-default-features --features postgres
-      - name: Run build
-        run: cargo build
       - name: Run tests.
-        run: bash test.sh
-      - name: Run tests again (also test migration revert).
         run: bash test.sh

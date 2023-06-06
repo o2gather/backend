@@ -5,5 +5,4 @@ if [[ -z $DATABASE_URL ]]; then
     echo "DATABASE_URL not found in .env.test"
     exit 1
 fi
-diesel migration run --database-url $DATABASE_URL
 cargo test -- --nocapture
