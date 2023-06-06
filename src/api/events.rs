@@ -1,12 +1,20 @@
 use actix_session::Session;
 use actix_web::{get, post, patch, delete, HttpResponse, Responder, web};
 use uuid::Uuid;
+use chrono::NaiveDateTime;
 
 use crate::api::types::{DefaultError, DefaultMsg};
 use crate::MyData;
 use crate::models::{NewEvent, UpdateEvent, EventWithMembers};
 use crate::PgPooledConnection;
 use crate::db;
+
+fn time_check(start_time: NaiveDateTime, end_time: NaiveDateTime) -> bool {
+    if start_time > end_time {
+        return false;
+    }
+    return true;
+}
 
 #[post("/events")]
 pub async fn create_event(
@@ -38,6 +46,12 @@ pub async fn create_event(
     }
 
     form.user_id = user_id;
+    if time_check(form.start_time, form.end_time) == false {
+        return HttpResponse::BadRequest().json(DefaultError {
+            message: "Start time should be earlier than end time".to_string(),
+            error_code: "400".to_string(),
+        });
+    }
     let mut conn: PgPooledConnection = data
         .pool
         .get()
@@ -175,6 +189,17 @@ pub async fn patch_event(
             }
         }
         None => {}
+    }
+
+    if form.start_time.is_some() && form.end_time.is_some() {
+        let start_time = form.start_time.unwrap();
+        let end_time = form.end_time.unwrap();
+        if time_check(start_time, end_time) == false {
+            return HttpResponse::BadRequest().json(DefaultError {
+                message: "Start time should be earlier than end time".to_string(),
+                error_code: "400".to_string(),
+            });
+        }
     }
 
     let event = db::update_event(&mut conn, path.0, form.into_inner());
