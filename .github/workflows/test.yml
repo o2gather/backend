@@ -16,13 +16,6 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
-    services:
-      cockroach:
-        image: timveil/cockroachdb-single-node:latest
-        env:
-          DATABASE_NAME: test
-        ports:
-          - 26257:26257
 
     steps:
       - name: Checkout repo.
