@@ -59,6 +59,12 @@ pub async fn join_event(
             error_code: "400".to_string(),
         });
     }
+    if event.end_time < chrono::Local::now().naive_local() {
+        return HttpResponse::BadRequest().json(DefaultError {
+            message: "Event has already ended".to_string(),
+            error_code: "400".to_string(),
+        });
+    }
 
     form.event_id = event_id;
     form.user_id = user_id;
@@ -140,6 +146,12 @@ pub async fn leave_event(
     if event.established == true {
         return HttpResponse::BadRequest().json(DefaultError {
             message: "Event has already established".to_string(),
+            error_code: "400".to_string(),
+        });
+    }
+    if event.end_time < chrono::Local::now().naive_local() {
+        return HttpResponse::BadRequest().json(DefaultError {
+            message: "Event has already ended".to_string(),
             error_code: "400".to_string(),
         });
     }

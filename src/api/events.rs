@@ -138,7 +138,7 @@ pub async fn get_event(
 #[patch("/events/{event_id}")]
 pub async fn patch_event(
     path: web::Path<(Uuid,)>,
-    form: web::Json<UpdateEvent>,
+    mut form: web::Json<UpdateEvent>,
     data: web::Data<MyData>,
     session: Session,
 ) -> impl Responder {
@@ -203,6 +203,21 @@ pub async fn patch_event(
         }
         None => {}
     }
+
+    if event.end_time < chrono::Local::now().naive_local() {
+        let new_form = UpdateEvent {
+            established: form.established,
+            start_time: None,
+            end_time: None,
+            max_amount: None,
+            min_amount: None,
+            category: None,
+            name: None,
+            description: None,
+        };
+        form = web::Json(new_form);
+    }
+
     if form.start_time.is_some() {
         event.start_time = form.start_time.unwrap();
     }
@@ -228,9 +243,22 @@ pub async fn patch_event(
             error_code: "400".to_string(),
         });
     }
-
-    let event = db::update_event(&mut conn, path.0, form.into_inner());
-
+    
+    let have_changes = form.established.is_some()
+        || form.start_time.is_some()
+        || form.end_time.is_some()
+        || form.max_amount.is_some()
+        || form.min_amount.is_some()
+        || form.category.is_some()
+        || form.name.is_some()
+        || form.description.is_some();
+    
+    let event: EventWithMembers;
+    if have_changes {
+        event = db::update_event(&mut conn, path.0, form.into_inner());
+    } else {
+        event = db::get_event_by_id(&mut conn, path.0, user_id).unwrap();
+    }
     
     HttpResponse::Ok().json(event)
 }
